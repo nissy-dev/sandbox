@@ -14,3 +14,11 @@
 
 ## chapter 2
 
+- `mut` : 変数がmutableであることを定義している
+  - Rustでは原則immutable
+- crate : https://crates.io/
+  - rust のパッケージを探したい時はここで探す
+- rust の標準入出力のエラーハンドリングは厳格
+  - 基本的に`io::Result`に対応する処理を必要がある
+- `match` : switch 文的な立ち位置だと理解
+  - 返り値がenumのとき、それぞれの値に対して処理を記述する
