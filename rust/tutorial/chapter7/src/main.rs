@@ -25,7 +25,8 @@ pub mod a {
     }
 }
 
-use a::series::of;
+// 外部からもアクセス可能
+pub use a::series::of;
 use a::series::of::nested_modules;
 
 enum TrafficLight {

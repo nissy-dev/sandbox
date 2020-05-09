@@ -1,6 +1,6 @@
 # Rust Tutorial メモ
 
-チュートリアル：https://doc.rust-jp.rs/book/second-edition/foreword.html
+チュートリアル：https://doc.rust-lang.org/book/index.html
 
 ## chapter 1
 

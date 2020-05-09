@@ -39,7 +39,10 @@ mod tests {
     use super::client;
     #[test]
     fn it_works() {
+        // relative path
         super::client::connect();
+        // absolute path
+        crate::client::connect();
         client::connect();
         assert_eq!(2 + 2, 4);
     }
