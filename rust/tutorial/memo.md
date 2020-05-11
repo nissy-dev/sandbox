@@ -2,7 +2,7 @@
 
 チュートリアル：https://doc.rust-lang.org/book/index.html
 
-## chapter 1
+## chapter1
 
 - `!` をつけると関数呼び出しではなく、マクロの呼び出しになる
   - マクロと関数の違いについては 19 章で確認する
@@ -14,7 +14,7 @@
   - `cargo check` ; build check
   - `cargo build --release` : release build (compile it with optimizations)
 
-## chapter 2
+## chapter2
 
 - `mut` : 変数が mutable であることを定義している
   - Rust では原則 immutable
@@ -113,4 +113,20 @@
   - デフォルトでは全てのメソッドがアクセスできないようになっている
 - `::` でモジュールの各メソッドにアクセス
   - `use` で省略可能
-  - 上の階層のモジュールを呼ぶには、`super`を使う
+  - 上の階層のモジュールを呼ぶには、`super`を使う (相対パスみたいな感じらしい)
+
+## chapter8
+
+- collections
+  - データ構造周りの標準ライブラリ
+  - https://doc.rust-lang.org/std/collections/index.html
+- Vector
+  - 可変長のリスト
+  - 基本同じ型だが、enum を使うと中身の型も多様にできる
+  - データはヒープ領域で管理
+- String
+  - 思ったより複雑らしい
+  - 結合はとりあえず `format!` を使うのが混乱はなさそう
+  - 添字アクセスは、言語によって 1 文字 1 byte でアクセスできないかも知れないからやめるべき
+- Heap
+  - データはヒープ領域で管理
