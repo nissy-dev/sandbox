@@ -1,5 +1,6 @@
 use itertools::join;
 use std::collections::HashMap;
+use std::io;
 
 fn main() {
     let v: Vec<i32> = Vec::new();
@@ -213,6 +214,8 @@ fn main() {
     println!("{}", pig_laten(value));
     let value = "apple";
     println!("{}", pig_laten(value));
+
+    text_interface();
 }
 
 fn mean(values: &Vec<f64>) -> f64 {
@@ -258,4 +261,33 @@ fn pig_laten(input_str: &str) -> String {
         return format!("{}-{}", input_str, "hay");
     }
     format!("{}-{}{}", join(&str_v[1..], ""), &str_v[0], "ay")
+}
+
+fn text_interface() {
+    println!("Please input operation!");
+    println!("ex) Add Sally(name) to Engineering(department)");
+    let mut database: HashMap<String, Vec<String>> = HashMap::new();
+
+    loop {
+        let mut command = String::new();
+        io::stdin()
+            .read_line(&mut command)
+            .expect("Failed to read line");
+
+        let text: Vec<&str> = command.split_whitespace().collect();
+        let operation = text[0].to_lowercase();
+
+        let name = text[1].to_string();
+        let department = text[3].to_string();
+        if operation == "add" {
+            database.entry(department).or_insert(Vec::new()).push(name);
+            println!("Member list");
+            println!("============================");
+            for (key, val) in database.iter() {
+                println!("Department: {}", key);
+                println!("Member: {}", join(val, ", "));
+            }
+            println!("============================");
+        }
+    }
 }
