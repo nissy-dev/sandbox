@@ -1,3 +1,4 @@
+use itertools::join;
 use std::collections::HashMap;
 
 fn main() {
@@ -207,6 +208,11 @@ fn main() {
     let values = vec![3, 3, 2, 1, 5, 7, 5, 3, 8, 4, 3, 5, 5];
     let mode = mode(&values);
     println!("mode is {:?}", mode);
+
+    let value = "first";
+    println!("{}", pig_laten(value));
+    let value = "apple";
+    println!("{}", pig_laten(value));
 }
 
 fn mean(values: &Vec<f64>) -> f64 {
@@ -243,4 +249,13 @@ fn mode(values: &Vec<i32>) -> Vec<i32> {
         .filter(|&(_, v)| v == max_value)
         .map(|(&k, _)| k)
         .collect()
+}
+
+fn pig_laten(input_str: &str) -> String {
+    let str_v: Vec<char> = input_str.chars().collect();
+    let check = vec!['a', 'b', 'c', 'd', 'e'];
+    if check.contains(&str_v[0]) {
+        return format!("{}-{}", input_str, "hay");
+    }
+    format!("{}-{}{}", join(&str_v[1..], ""), &str_v[0], "ay")
 }
