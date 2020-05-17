@@ -277,14 +277,16 @@ fn text_interface() {
         let text: Vec<&str> = command.split_whitespace().collect();
         let operation = text[0].to_lowercase();
 
+        // ライフタイムの問題の解決方法がわからず、コピーした
         let name = text[1].to_string();
         let department = text[3].to_string();
         if operation == "add" {
-            database.entry(department).or_insert(Vec::new()).push(name);
+            database.entry(department).or_insert(vec![]).push(name);
             println!("Member list");
             println!("============================");
-            for (key, val) in database.iter() {
+            for (key, val) in &mut database {
                 println!("Department: {}", key);
+                val.sort();
                 println!("Member: {}", join(val, ", "));
             }
             println!("============================");
