@@ -115,15 +115,15 @@ fn main() {
     let m = Mutex::new(5);
 
     {
+        // 参照する時はロックする
         let mut num = m.lock().unwrap();
         *num = 6;
+        // スコープを抜けたらアンロック
     }
 
     println!("m = {:?}", m);
 
     // 複数のスレッド間で値を共有
-    // 所有権を複数与えるには, Rc が使えるがスレッドには使えない
-    // そのような所で Arc を使う
     let counter = Arc::new(Mutex::new(0));
     let mut handles = vec![];
 
