@@ -112,7 +112,7 @@ pub struct NPendingReviewPost {
 
 impl NPost {
   pub fn new() -> NDraftPost {
-    DraftPost {
+    NDraftPost {
       content: String::new(),
     }
   }
@@ -126,7 +126,7 @@ impl NDraftPost {
   pub fn add_text(&mut self, text: &str) {
     self.content.push_str(text);
   }
-  pub fn request_review(self) -> PendingReviewPost {
+  pub fn request_review(self) -> NPendingReviewPost {
     NPendingReviewPost {
       content: self.content,
     }
@@ -134,7 +134,7 @@ impl NDraftPost {
 }
 
 impl NPendingReviewPost {
-  pub fn approve(self) -> Post {
+  pub fn approve(self) -> NPost {
     NPost {
       content: self.content,
     }
