@@ -238,3 +238,11 @@
   - Rust で継承の資料 : https://qiita.com/nacika_ins/items/cf3782bd371da79def74#trait-object
 - トレイト/トレイトオブジェクト
   - メソッドの束縛ができる = ダックタイピングみたいなイメージ
+
+## chapter18
+
+- パターンマッチ
+  - match を使う方が if let を使う方が安全
+  - Rust で継承の資料 : https://qiita.com/nacika_ins/items/cf3782bd371da79def74#trait-object
+- _ と _var では挙動が異なる
+  - _var : 値を変数に束縛する, _ : 値を変数に全く束縛しない
