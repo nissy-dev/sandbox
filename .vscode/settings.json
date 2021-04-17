@@ -1,3 +1,6 @@
 {
-  "editor.formatOnSave": true,
+  "[markdown]": {
+    "editor.formatOnSave": true,
+    "files.trimTrailingWhitespace": false, // Markdownのファイルは行末の空白をトリミングしない
+  },
 }
