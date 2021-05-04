@@ -1,6 +1,10 @@
 {
   "[markdown]": {
     "editor.formatOnSave": true,
-    "files.trimTrailingWhitespace": false, // Markdownのファイルは行末の空白をトリミングしない
-  },
+    "files.trimTrailingWhitespace": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": true
+    }
+  }
 }
