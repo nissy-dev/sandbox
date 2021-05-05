@@ -1,4 +1,4 @@
-# C10k 問題の実験
+# c10k 問題の実験
 
 [Apache と Nginx について比較](https://qiita.com/kamihork/items/49e2a363da7d840a4149)
 
