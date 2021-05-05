@@ -10,3 +10,6 @@ __pycache__/
 
 # for rust
 target
+
+# html
+c10k-exp/large_html/index.html
