@@ -62,7 +62,7 @@ impl DiskManager {
         })
     }
 
-    pub fn open(heap_file_path: impl AsRef<Path>) -> io::Result<Self> {
+    pub fn open<S: AsRef<Path>>(heap_file_path: S) -> io::Result<Self> {
         let heap_file = OpenOptions::new()
             .read(true)
             .write(true)
