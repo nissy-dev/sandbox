@@ -37,8 +37,13 @@
   - AsRef：参照から参照への変換を担うトレイト
     - https://doc.rust-lang.org/std/convert/trait.AsRef.html
     - example をみる限り、面倒な型変換を無くしてくれそう
+  - `#[derive(...)]`
+    - 継承、特定のトレイトの標準的な実装を提供する
+  - `#[repr(C)]`
+    - メモリレイアウトの最適化をしない設定
   - `impl Trait`
-    - Genericsの糖衣構文
+    - Genericsっぽく書いた方がわかりやすい
+    - トレイトを実装した構造体を受け取るということ
     - https://doc.rust-jp.rs/book-ja/ch10-02-traits.html
       - 引数としてのトレイトのところに書いてあった
   - Seek : ファイルのカーソルを指定の位置へ移動させる

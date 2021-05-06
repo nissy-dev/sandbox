@@ -10,7 +10,7 @@ use std::{
 
 pub const PAGE_SIZE: usize = 4096;
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-#[repr(C)]
+// #[repr(C)]
 pub struct PageId(pub u64);
 impl PageId {
     pub const INVALID_PAGE_ID: PageId = PageId(u64::MAX);
