@@ -1,5 +1,5 @@
 use std::{
-    // convert::TryInto,
+    convert::TryInto,
     fs::{File, OpenOptions},
     io::{self, Read, Seek, SeekFrom, Write},
     path::Path,
@@ -10,7 +10,7 @@ use std::{
 
 pub const PAGE_SIZE: usize = 4096;
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-// #[repr(C)]
+#[repr(C)]
 pub struct PageId(pub u64);
 impl PageId {
     pub const INVALID_PAGE_ID: PageId = PageId(u64::MAX);
@@ -28,24 +28,25 @@ impl PageId {
     }
 }
 
-// impl Default for PageId {
-//     fn default() -> Self {
-//         Self::INVALID_PAGE_ID
-//     }
-// }
+// デフォルト値の設定
+impl Default for PageId {
+    fn default() -> Self {
+        Self::INVALID_PAGE_ID
+    }
+}
 
-// impl From<Option<PageId>> for PageId {
-//     fn from(page_id: Option<PageId>) -> Self {
-//         page_id.unwrap_or_default()
-//     }
-// }
+impl From<Option<PageId>> for PageId {
+    fn from(page_id: Option<PageId>) -> Self {
+        page_id.unwrap_or_default()
+    }
+}
 
-// impl From<&[u8]> for PageId {
-//     fn from(bytes: &[u8]) -> Self {
-//         let arr = bytes.try_into().unwrap();
-//         PageId(u64::from_ne_bytes(arr))
-//     }
-// }
+impl From<&[u8]> for PageId {
+    fn from(bytes: &[u8]) -> Self {
+        let arr = bytes.try_into().unwrap();
+        PageId(u64::from_ne_bytes(arr))
+    }
+}
 
 pub struct DiskManager {
     heap_file: File,
@@ -87,6 +88,13 @@ impl DiskManager {
         let offset = PAGE_SIZE as u64 * page_id.to_u64();
         self.heap_file.seek(SeekFrom::Start(offset))?;
         self.heap_file.write_all(data)
+    }
+
+    pub fn sync(&mut self) -> io::Result<()> {
+        // ディスクに書き出させる
+        self.heap_file.flush()?;
+        // メモリにあるデータを全てディスクへ
+        self.heap_file.sync_all()
     }
 }
 
