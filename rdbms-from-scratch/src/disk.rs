@@ -6,10 +6,10 @@ use std::{
     u64,
 };
 
-// use zerocopy::{AsBytes, FromBytes};
+use zerocopy::{AsBytes, FromBytes};
 
 pub const PAGE_SIZE: usize = 4096;
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash, AsBytes, FromBytes)]
 #[repr(C)]
 pub struct PageId(pub u64);
 impl PageId {
