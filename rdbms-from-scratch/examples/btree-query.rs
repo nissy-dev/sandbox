@@ -10,7 +10,6 @@ fn main() -> Result<()> {
     let mut bufmgr = BufferPoolManager::new(disk, pool);
 
     let btree = BTree::new(PageId(0));
-    // searchが動いていない...?
     let mut iter = btree.search(&mut bufmgr, SearchMode::Key(b"Hyogo".to_vec()))?;
     let (key, value) = iter.next(&mut bufmgr)?.unwrap();
     println!("{:02x?} = {:02x?}", key, value);

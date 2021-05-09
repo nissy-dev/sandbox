@@ -1,4 +1,4 @@
-# c10k 問題の実験
+# C10K 問題の実験
 
 [Apache と Nginx について比較](https://qiita.com/kamihork/items/49e2a363da7d840a4149)
 
@@ -43,9 +43,9 @@ $ ab -c 10000 -n 10000 -r http://localhost/ > /tmp/nginx_c10000_n10000.log
 - レスポンスの速さ
   - Apache の方が全体的にかなり遅い
   - Nignx は、`-c 10000 -n 10000`で一瞬だった
-    - プロセスを立ち上げるオーバーヘッドがないから...?
+    - やはりイベント駆動の利点が反映されている結果に
 - レスポンスの正確さ (失敗の少なさ)
   - Apache の方が正確
     - 特に同時接続数が少ないときに顕著
   - Nginx はデフォルトで同時接続数を`2000`に制限していた
-    - `/etc/nginx/nginx.conf`に設定は書かれている
+    - `/etc/nginx/nginx.conf`に設定は書かれていた

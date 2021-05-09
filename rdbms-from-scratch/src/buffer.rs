@@ -136,6 +136,7 @@ impl BufferPoolManager {
 
     // ページの貸し出し処理
     pub fn fetch_page(&mut self, page_id: PageId) -> Result<Rc<Buffer>, Error> {
+        // dbg!(page_id);
         if let Some(&buffer_id) = self.page_table.get(&page_id) {
             let frame = &mut self.pool[buffer_id];
             frame.usage_count += 1;

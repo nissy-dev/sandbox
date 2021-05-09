@@ -1,7 +1,7 @@
 use std::{
     convert::TryInto,
     fs::{File, OpenOptions},
-    io::{self, Read, Seek, SeekFrom, Write},
+    io::{Read, Result, Seek, SeekFrom, Write},
     path::Path,
     u64,
 };
@@ -54,7 +54,7 @@ pub struct DiskManager {
 }
 
 impl DiskManager {
-    pub fn new(heap_file: File) -> io::Result<Self> {
+    pub fn new(heap_file: File) -> Result<Self> {
         let heap_file_size = heap_file.metadata()?.len();
         let next_page_id = heap_file_size / PAGE_SIZE as u64;
         Ok(Self {
@@ -63,7 +63,7 @@ impl DiskManager {
         })
     }
 
-    pub fn open<S: AsRef<Path>>(heap_file_path: S) -> io::Result<Self> {
+    pub fn open<S: AsRef<Path>>(heap_file_path: S) -> Result<Self> {
         let heap_file = OpenOptions::new()
             .read(true)
             .write(true)
@@ -78,19 +78,19 @@ impl DiskManager {
         PageId(page_id)
     }
 
-    pub fn read_page_data(&mut self, page_id: PageId, data: &mut [u8]) -> io::Result<()> {
+    pub fn read_page_data(&mut self, page_id: PageId, data: &mut [u8]) -> Result<()> {
         let offset = PAGE_SIZE as u64 * page_id.to_u64();
         self.heap_file.seek(SeekFrom::Start(offset))?;
         self.heap_file.read_exact(data)
     }
 
-    pub fn write_page_data(&mut self, page_id: PageId, data: &[u8]) -> io::Result<()> {
+    pub fn write_page_data(&mut self, page_id: PageId, data: &[u8]) -> Result<()> {
         let offset = PAGE_SIZE as u64 * page_id.to_u64();
         self.heap_file.seek(SeekFrom::Start(offset))?;
         self.heap_file.write_all(data)
     }
 
-    pub fn sync(&mut self) -> io::Result<()> {
+    pub fn sync(&mut self) -> Result<()> {
         // ディスクに書き出させる
         self.heap_file.flush()?;
         // メモリにあるデータを全てディスクへ
