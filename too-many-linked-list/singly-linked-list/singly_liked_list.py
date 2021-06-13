@@ -8,10 +8,10 @@ class SinglyLinkedList:
     def __init__(self):
         self.head = None
 
-    def push_back(self, value):
+    def push_front(self, value):
         self.head = Node(value, self.head)
 
-    def push_front(self, value):
+    def push_back(self, value):
         if self.head is None:
             self.head = Node(value, self.head)
             return
@@ -70,6 +70,17 @@ class SinglyLinkedList:
 
         return None
 
+    def search_node(self, index):
+        curr_node = self.head
+        cnt = 0
+        while curr_node is not None:
+            if index == cnt:
+                return curr_node
+            cnt += 1
+            curr_node = curr_node.next
+
+        return None
+
     def get(self, index):
         curr_node = self.head
         cnt = 0
@@ -115,9 +126,9 @@ class SinglyLinkedList:
 
 if __name__ == "__main__":
     linked_list = SinglyLinkedList()
-    linked_list.push_back(1)
-    linked_list.push_back(2)
-    linked_list.push_front(0)
+    linked_list.push_front(1)
+    linked_list.push_front(2)
+    linked_list.push_back(0)
     assert linked_list.size() == 3
     assert linked_list.show() == "2 -> 1 -> 0 -> None"
 
@@ -130,8 +141,8 @@ if __name__ == "__main__":
     pop_value = linked_list.pop()
     assert pop_value == 1
 
-    linked_list.push_back(1)
-    linked_list.push_back(2)
+    linked_list.push_front(1)
+    linked_list.push_front(2)
     assert linked_list.get(0) == 2
     assert linked_list.get(1) == 1
     assert linked_list.get(2) == 0
