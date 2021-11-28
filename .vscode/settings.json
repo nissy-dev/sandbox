@@ -6,5 +6,6 @@
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": true
     }
-  }
+  },
+  "python.pythonPath": "/Users/nissy-dev/.asdf/installs/python/miniconda3-latest/bin/python"
 }

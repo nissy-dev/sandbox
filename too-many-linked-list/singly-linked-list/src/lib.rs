@@ -210,13 +210,11 @@ mod tests {
     #[test]
     fn push() {
         let mut list = SinglyLinkedList::new();
-
         list.push_front(1);
         list.push_front(2);
         list.push_back(0);
         assert_eq!(list.size(), 3);
-        // 2が先頭、0が末端
-        assert_eq!(list.show(), "2 -> 1 -> 0 -> None");
+        assert_eq!(list.show(), "2 -> 1 -> 0 -> None"); // 2が先頭、0が末端
     }
 
     #[test]
@@ -249,8 +247,6 @@ mod tests {
     #[test]
     fn insert() {
         let mut list = setup();
-
-        // insert
         list.insert(1, 5);
         assert_eq!(list.show(), "2 -> 5 -> 1 -> 0 -> None");
         assert_eq!(list.insert(7, 3), None);
@@ -262,8 +258,6 @@ mod tests {
     #[test]
     fn delete() {
         let mut list = setup();
-
-        // delete
         assert_eq!(list.delete(2), Some(0));
         assert_eq!(list.show(), "2 -> 1 -> None");
         assert_eq!(list.delete(5), None);
@@ -274,8 +268,6 @@ mod tests {
     #[test]
     fn delete_by_value() {
         let mut list = setup();
-
-        // delete by value
         list.delete_by_value(1);
         assert_eq!(list.show(), "2 -> 0 -> None");
         assert_eq!(list.delete_by_value(10), None);
