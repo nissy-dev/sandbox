@@ -6,7 +6,8 @@ plugins {
   kotlin("jvm") version "1.6.0"
   kotlin("plugin.spring") version "1.6.0"
   kotlin("plugin.jpa") version "1.6.0"
-  kotlin("plugin.allopen") version "1.6.10"
+  kotlin("plugin.allopen") version "1.6.0"
+  kotlin("kapt") version "1.6.0"
 }
 
 group = "com.example"
@@ -29,6 +30,7 @@ dependencies {
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
   developmentOnly("org.springframework.boot:spring-boot-devtools")
   runtimeOnly("com.h2database:h2")
+  kapt("org.springframework.boot:spring-boot-configuration-processor")
   testImplementation("org.springframework.boot:spring-boot-starter-test") {
     exclude(module = "junit")
     exclude(module = "mockito-core")
@@ -39,9 +41,9 @@ dependencies {
 }
 
 allOpen {
-  annotation("javax.persistance.Entity")
-  annotation("javax.persistance.Embeddable")
-  annotation("javax.persistance.MappedSuperclass")
+  annotation("jakarta.persistance.Entity")
+  annotation("jakarta.persistance.Embeddable")
+  annotation("jakarta.persistance.MappedSuperclass")
 }
 
 tasks.withType<KotlinCompile> {
