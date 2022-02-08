@@ -1,0 +1,25 @@
+{
+  "name": "commilint-playground",
+  "description": "",
+  "version": "0.0.1",
+  "author": "nissy-dev <nd.12021218@gmail.com> (https://github.com/nissy-dev)",
+  "bugs": {
+    "url": "https://github.com/nissy-dev/commilint-playground/issues"
+  },
+  "homepage": "https://github.com/nissy-dev/commilint-playground",
+  "keywords": [],
+  "license": "MIT",
+  "main": "",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nissy-dev/commilint-playground.git"
+  },
+  "scripts": {
+    "test": "exit 1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^16.1.0",
+    "@commitlint/config-conventional": "^16.0.0"
+  }
+}

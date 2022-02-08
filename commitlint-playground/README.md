@@ -1,0 +1,1 @@
+# commilint-playground
