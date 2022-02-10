@@ -8,7 +8,7 @@ on:
 jobs:
   run-commitlint-on-main:
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'nissy-dev' }}
+    if: ${{ github.actor == 'hogehoge' }}
     steps:
       - uses: actions/checkout@v2
         with:
