@@ -11,6 +11,7 @@ jobs:
         id: package-version
         # see: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
         run: node -p -e '`::set-output name=version::${require("./package.json").version}`'
+        working-directory: ./commitlint-playground
       - name: Push tag
         run: |
           git config user.name "${GITHUB_ACTOR}"
