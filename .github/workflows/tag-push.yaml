@@ -1,0 +1,19 @@
+name: 'tag-push'
+on:
+  workflow_dispatch:
+
+jobs:
+  tag-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set package version to variables
+        id: package-version
+        # see: https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
+        run: node -p -e '`::set-output name=version::${require("./package.json").version}`'
+      - name: Push tag
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git tag -a ${{ steps.package-version.outputs.version }}
+          git push origin ${{ steps.package-version.outputs.version }}
