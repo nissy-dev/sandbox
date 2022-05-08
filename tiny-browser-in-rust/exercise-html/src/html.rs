@@ -1,7 +1,7 @@
-use crate::dom::{AttrMap, Element, Node};
-use combine::error::ParseError;
-use combine::parser::char::char;
-use combine::{parser, Parser, Stream};
+use crate::dom::{AttrMap, Element, Node, Text};
+use combine::error::{ParseError, StreamError};
+use combine::parser::char::{char, letter, spaces};
+use combine::{attempt, between, choice, many, many1, parser, satisfy, sep_end_by, Parser, Stream};
 
 /// `attribute` consumes `name="value"`.
 fn attribute<Input>() -> impl Parser<Input, Output = (String, String)>
@@ -9,8 +9,16 @@ where
     Input: Stream<Token = char>,
     Input::Error: ParseError<Input::Token, Input::Range, Input::Position>,
 {
-    todo!("you need to implement this combinator");
-    (char(' ')).map(|_| ("".to_string(), "".to_string()))
+    (
+        many1::<String, _, _>(letter()).skip(spaces()), // 属性の名前を読む
+        char('=').skip(spaces()),                       // = を読む
+        between(
+            char('"'),
+            char('"'),
+            many1::<String, _, _>(satisfy(|c: char| c != '"')),
+        ), // 引用符の間の、引用符を含まない文字を読む
+    )
+        .map(|v| (v.0, v.2)) // はじめに読んだ属性の名前と、最後に読んだ引用符の中の文字列を結果として返す
 }
 
 /// `attributes` consumes `name1="value1" name2="value2" ... name="value"`
@@ -19,8 +27,7 @@ where
     Input: Stream<Token = char>,
     Input::Error: ParseError<Input::Token, Input::Range, Input::Position>,
 {
-    todo!("you need to implement this combinator");
-    (char(' ')).map(|_| AttrMap::new())
+    sep_end_by(attribute(), spaces())
 }
 
 /// `open_tag` consumes `<tag_name attr_name="attr_value" ...>`.
@@ -29,8 +36,9 @@ where
     Input: Stream<Token = char>,
     Input::Error: ParseError<Input::Token, Input::Range, Input::Position>,
 {
-    todo!("you need to implement this combinator");
-    (char(' ')).map(|_| ("".to_string(), AttrMap::new()))
+    let open_tag_name = many1::<String, _, _>(letter());
+    let open_tag_content = (open_tag_name.skip(spaces()), attributes());
+    between(char('<'), char('>'), open_tag_content)
 }
 
 /// close_tag consumes `</tag_name>`.
@@ -39,8 +47,9 @@ where
     Input: Stream<Token = char>,
     Input::Error: ParseError<Input::Token, Input::Range, Input::Position>,
 {
-    todo!("you need to implement this combinator");
-    (char(' ')).map(|_| ("".to_string()))
+    let close_tag_name = many1::<String, _, _>(letter());
+    let close_tag_content = (char('/').skip(spaces()), close_tag_name).map(|v| v.1);
+    between(char('<'), char('>'), close_tag_content)
 }
 
 // `nodes_` (and `nodes`) tries to parse input as Element or Text.
@@ -49,8 +58,7 @@ where
     Input: Stream<Token = char>,
     Input::Error: ParseError<Input::Token, Input::Range, Input::Position>,
 {
-    todo!("you need to implement this combinator");
-    (char(' ')).map(|_| vec![Element::new("".into(), AttrMap::new(), vec![])])
+    attempt(many(choice((attempt(element()), attempt(text())))))
 }
 
 /// `text` consumes input until `<` comes.
@@ -59,8 +67,7 @@ where
     Input: Stream<Token = char>,
     Input::Error: ParseError<Input::Token, Input::Range, Input::Position>,
 {
-    todo!("you need to implement this combinator");
-    (char(' ')).map(|_| Element::new("".into(), AttrMap::new(), vec![]))
+    many1::<String, _, _>(satisfy(|c: char| c != '<')).map(|t| Text::new(t))
 }
 
 /// `element` consumes `<tag_name attr_name="attr_value" ...>(children)</tag_name>`.
@@ -69,8 +76,21 @@ where
     Input: Stream<Token = char>,
     Input::Error: ParseError<Input::Token, Input::Range, Input::Position>,
 {
-    todo!("you need to implement this combinator");
-    (char(' ')).map(|_| Element::new("".into(), AttrMap::new(), vec![]))
+    (open_tag(), nodes(), close_tag()).and_then(
+        |((open_tag_name, attributes), children, close_tag_name)| {
+            if open_tag_name == close_tag_name {
+                Ok(Element::new(open_tag_name, attributes, children))
+            } else {
+                Err(<Input::Error as ParseError<
+                    char,
+                    Input::Range,
+                    Input::Position,
+                >>::StreamError::message_static_message(
+                    "tag name of open tag and close tag mismatched",
+                ))
+            }
+        },
+    )
 }
 
 parser! {
