@@ -1,3 +1,6 @@
+use std::io::Read;
+use std::{env, fs::File};
+
 use exercise_rendering::{
     css,
     dom::{Node, NodeType},
@@ -13,7 +16,7 @@ const HTML: &str = r#"<body>
     <p class="inline">:)</p>
     <div class="none"><p>this should not be shown</p></div>
     <style>
-        .none { 
+        .none {
             display: none;
         }
         .inline {
@@ -48,9 +51,20 @@ pub fn collect_tag_inners(node: &Box<Node>, tag_name: &str) -> Vec<String> {
 }
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    let html = if args.len() > 1 {
+        let mut f = File::open(&args[1]).expect("file not found");
+        let mut contents = String::new();
+        f.read_to_string(&mut contents)
+            .expect("something went wrong reading the file");
+        contents
+    } else {
+        HTML.to_string()
+    };
+
     let mut siv = cursive::default();
 
-    let node = html::parse(HTML);
+    let node = html::parse(&html);
     let stylesheet = css::parse(&format!(
         "{}\n{}",
         DEFAULT_STYLESHEET,
