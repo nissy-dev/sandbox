@@ -1,5 +1,7 @@
 //! This module includes some implementations on node styles.
 
+use cursive::view::Margins;
+
 use crate::{
     css::{CSSValue, Stylesheet},
     dom::{Node, NodeType},
@@ -58,6 +60,26 @@ impl<'a> StyledNode<'a> {
                 _ => Display::Inline,
             },
             _ => Display::Inline,
+        }
+    }
+
+    pub fn get_margin(&self) -> Margins {
+        match self.properties.get("margin") {
+            Some(CSSValue::Keyword(s)) => {
+                let val = s.as_str().parse::<usize>().unwrap();
+                Margins {
+                    top: val,
+                    right: val,
+                    bottom: val,
+                    left: val,
+                }
+            }
+            _ => Margins {
+                top: 0,
+                right: 0,
+                bottom: 0,
+                left: 0,
+            },
         }
     }
 }

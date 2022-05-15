@@ -2,7 +2,7 @@ use combine::{
     choice,
     error::StreamError,
     many, many1, optional,
-    parser::char::{self, letter, newline, space},
+    parser::char::{self, digit, letter, newline, space},
     sep_by, sep_end_by, ParseError, Parser, Stream,
 };
 
@@ -262,7 +262,9 @@ where
     Input: Stream<Token = char>,
     Input::Error: ParseError<Input::Token, Input::Range, Input::Position>,
 {
-    let keyword = many1(letter()).map(|s| CSSValue::Keyword(s));
+    let keyword = many1(letter())
+        .map(|s| CSSValue::Keyword(s))
+        .or(many1::<Vec<_>, _, _>(digit()).map(|s| CSSValue::Keyword(s.into_iter().collect())));
     keyword
 }
 
@@ -373,6 +375,22 @@ mod tests {
                             value: CSSValue::Keyword("dd".to_string()),
                         }
                     ]
+                },
+                ""
+            ))
+        );
+
+        assert_eq!(
+            rule().parse(".test { margin: 1; }"),
+            Ok((
+                Rule {
+                    selectors: vec![SimpleSelector::ClassSelector {
+                        class_name: "test".to_string()
+                    }],
+                    declarations: vec![Declaration {
+                        name: "margin".to_string(),
+                        value: CSSValue::Keyword("1".to_string())
+                    },]
                 },
                 ""
             ))

@@ -4,7 +4,7 @@ use crate::{
 };
 use cursive::{
     view::{IntoBoxedView, View, ViewWrapper},
-    views::{DummyView, LinearLayout, Panel, TextView},
+    views::{DummyView, LinearLayout, PaddedView, Panel, TextView},
 };
 
 pub type ElementContainer = Box<dyn View>;
@@ -28,8 +28,7 @@ pub fn to_element_container<'a>(layout: LayoutBox<'a>) -> ElementContainer {
                         }
                     }
                 };
-
-                p.into_boxed_view()
+                PaddedView::new(layout.margin, p).into_boxed_view()
             }
             BoxProps {
                 node_type: NodeType::Text(ref t),
@@ -42,7 +41,7 @@ pub fn to_element_container<'a>(layout: LayoutBox<'a>) -> ElementContainer {
                 let text_to_display = text_to_display.replace("\n", "");
                 let text_to_display = text_to_display.trim();
                 if text_to_display != "" {
-                    TextView::new(text_to_display).into_boxed_view()
+                    PaddedView::new(layout.margin, TextView::new(text_to_display)).into_boxed_view()
                 } else {
                     (DummyView {}).into_boxed_view()
                 }
@@ -55,7 +54,7 @@ pub fn to_element_container<'a>(layout: LayoutBox<'a>) -> ElementContainer {
                 p.with_view_mut(|v| v.add_child(to_element_container(child)));
             }
 
-            p.into_boxed_view()
+            PaddedView::new(layout.margin, p).into_boxed_view()
         }
     }
 }

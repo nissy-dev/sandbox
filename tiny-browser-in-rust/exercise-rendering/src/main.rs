@@ -21,6 +21,7 @@ const HTML: &str = r#"<body>
         }
         .inline {
             display: inline;
+            margin: 10;
         }
     </style>
 </body>"#;
