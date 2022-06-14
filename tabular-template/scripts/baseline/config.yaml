@@ -1,0 +1,21 @@
+data:
+  data_path: ../../dataset
+  feat_path: ../../dataset/features
+  features: ["SignalGradients", "RollingStats", "LagFeatures", "BatchNumber"]
+cv:
+  method: StratifiedGroupKFold
+  n_splits: 5
+  group: batch_num
+model:
+  objective: multiclass
+  num_class: 11
+  num_iterations: 5
+  num_leaves: 100
+  max_depth: 7
+  lr: 0.01
+  num_threads: -1
+  early_stopping_rounds: 100
+all:
+  target: open_channels
+  ignore_cols: ["time"]
+  seed: 1234

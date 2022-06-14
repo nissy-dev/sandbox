@@ -1,0 +1,6 @@
+N_GRADS = 4
+SIGNAL_BATCH_SIZE = 500000
+DATASET_PATH = '../../dataset'
+FEATURE_PATH = '../../dataset/features'
+ROLLING_WINDOWS = [5, 10, 50, 100, 500, 1000]
+SHIFT_PERIODS = [1, 2, 3, 4, 5, 10, 15, 20]
