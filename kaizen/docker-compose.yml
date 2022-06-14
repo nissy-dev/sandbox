@@ -1,0 +1,21 @@
+version: '3'
+services:
+  python3:
+    build: .
+    container_name: python3
+    tty: true
+    volumes:
+      - ./src:/workspace
+      - ./config:/root/.config/matplotlib
+    expose:
+      - "8888"
+    ports:
+      - "127.0.0.1:8888:8888"
+    entrypoint: >
+      jupyter-lab
+      --allow-root
+      --ip=0.0.0.0
+      --port=8888
+      --no-browser
+      --NotebookApp.token=''
+      --notebook-dir=/workspace
