@@ -1,0 +1,25 @@
+name: Run commitlint on main
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  run-commitlint-on-main:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'hogehoge' }}
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+      - name: Install dependencies
+        working-directory: ./commitlint-playground
+        run: npm ci
+      - name: Validate commits on main
+        working-directory: ./commitlint-playground
+        run: npx commitlint --from=HEAD^1 --verbose
