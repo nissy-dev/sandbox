@@ -1,0 +1,15 @@
+# fly.toml app configuration file generated for zero2prod-nissy on 2023-07-23T16:11:11+09:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "zero2prod-nissy"
+primary_region = "nrt"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]

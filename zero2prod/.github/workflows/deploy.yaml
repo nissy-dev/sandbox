@@ -1,0 +1,23 @@
+name: Deploy to Fly.io
+on:
+  push:
+    branches:
+      - main
+env:
+  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+jobs:
+  deploy:
+    name: Deploy app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: |
+          flyctl secrets set APP_DATABASE__HOST=${{ secrets.DB_HOST }} --stage && \
+          flyctl secrets set APP_DATABASE__PORT=${{ secrets.DB_PORT }} --stage && \
+          flyctl secrets set APP_DATABASE__PASSWORD=${{ secrets.DB_PASSWORD }} --stage && \
+          flyctl secrets set APP_REDIS_URI=${{ secrets.REDIS_URI }} --stage && \
+          flyctl secrets set APP_APPLICATION__BASE_URL=${{ secrets.APP_BASE_URL }} --stage && \
+          flyctl secrets set APP_EMAIL_CLIENT__AUTHORIZATION_TOKEN=${{ secrets.POSTMARK_TOKEN }} --stage && \
+          flyctl secrets set APP_EMAIL_CLIENT__SENDER_EMAIL=${{ secrets.SENDER_EMAIL }} --stage && \
+          flyctl deploy --remote-only
