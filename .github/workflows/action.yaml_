@@ -1,0 +1,43 @@
+name: "test"
+
+on:
+  push:
+
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "job1"
+
+  job2:
+    runs-on: ubuntu-latest
+    steps:
+      - run: exit 1
+
+  job3:
+    runs-on: ubuntu-latest
+    needs: [job1, job2]
+    if: always() && needs.job1.result == 'success' && needs.job2.result == 'success'
+    steps:
+      - run: exit 1
+
+  job4:
+    runs-on: ubuntu-latest
+    needs: [job3]
+    if: always() && needs.job3.result == 'success'
+    steps:
+      - run: exit 1
+
+  job5:
+    runs-on: ubuntu-latest
+    needs: [job3, job4]
+    if: always() && needs.job3.result == 'success'
+    steps:
+      - run: echo "job5"
+
+  job6:
+    runs-on: ubuntu-latest
+    needs: [job2, job5]
+    if: always() && needs.job2.result == 'success'
+    steps:
+      - run: echo "job6"
