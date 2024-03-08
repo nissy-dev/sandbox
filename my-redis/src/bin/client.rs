@@ -2,6 +2,7 @@ use mini_redis::client;
 use tokio::sync::{mpsc, oneshot};
 
 use bytes::Bytes;
+use tokio_stream::StreamExt;
 
 type Responder<T> = oneshot::Sender<mini_redis::Result<T>>;
 
@@ -75,4 +76,37 @@ async fn main() {
     task1.await.unwrap();
     task2.await.unwrap();
     manager.await.unwrap();
+
+    tokio::spawn(async { publish().await });
+
+    subscribe().await.unwrap();
+
+    println!("DONE");
+}
+
+async fn publish() -> mini_redis::Result<()> {
+    let mut client = client::connect("127.0.0.1:6379").await?;
+
+    // いくつかのデータを発行する
+    client.publish("numbers", "1".into()).await?;
+    client.publish("numbers", "two".into()).await?;
+    client.publish("numbers", "3".into()).await?;
+    client.publish("numbers", "four".into()).await?;
+    client.publish("numbers", "five".into()).await?;
+    client.publish("numbers", "6".into()).await?;
+    Ok(())
+}
+
+async fn subscribe() -> mini_redis::Result<()> {
+    let client = client::connect("127.0.0.1:6379").await?;
+    let subscriber = client.subscribe(vec!["numbers".to_string()]).await?;
+    let messages = subscriber.into_stream();
+
+    tokio::pin!(messages);
+
+    while let Some(msg) = messages.next().await {
+        println!("got = {:?}", msg);
+    }
+
+    Ok(())
 }
