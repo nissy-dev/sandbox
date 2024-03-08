@@ -1,0 +1,29 @@
+name: Create Release PR
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  create_release_pr:
+    if: github.event.pull_request.merged && github.event.pull_request.base.ref == 'stage'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Close existing open PRs targeting release branch
+        run: |
+          gh pr list --state open --base release --json number,title | jq -r '.[] | "\(.number) \(.title)"' | while read -r pr; do
+            IFS=' ' read -r pr_number pr_title <<< "$pr"
+            gh pr close $pr_number --comment "Closing this PR as a new release PR has been opened."
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create release PR
+        run: |
+          gh pr create --base release --head stage \
+            --title "Release: ${{ github.event.pull_request.title }}" \
+            --body "この PR は、ステージにマージされた変更に基づいて新しいリリースのために自動的に作成されました。" \
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
