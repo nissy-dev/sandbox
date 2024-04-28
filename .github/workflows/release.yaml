@@ -25,7 +25,7 @@ jobs:
           git push --set-upstream origin bot/release
           git switch main
           gh pr create --base main --head bot/release \
-            --title "Release ${{ github.event.inputs.version }}"
+            --title "Release ${{ github.event.inputs.version }}" \
             --body "[リリースのワークフロー](https://github.com/nissy-dev/sandbox/actions/workflows/release.yaml)から自動で作成されました。"
           gh pr merge bot/release --squash --delete-branch
           git pull origin main
