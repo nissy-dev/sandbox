@@ -1,0 +1,19 @@
+name: "Dispatch action in an another repository"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: dispatch action
+        run: |
+          curl -X POST \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "Authorization: token $PAT_WORKFLOW_DISPATCH" \
+          https://api.github.com/repos/nissy-dev/private-sandbox/actions/workflows/deploy.yaml/dispatches \
+          -d '{"ref":"main"}'
+        env:
+          PAT_WORKFLOW_DISPATCH: ${{ secrets.PAT_WORKFLOW_DISPATCH }}
