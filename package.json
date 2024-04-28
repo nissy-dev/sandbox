@@ -1,7 +1,7 @@
 {
   "name": "sandbox",
   "description": "チュートリアル、本の写経、雑に書いたコードとか",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "nissy-dev <nd.12021218@gmail.com> (https://github.com/nissy-dev)",
   "bugs": {
     "url": "https://github.com/nissy-dev/sandbox/issues"
