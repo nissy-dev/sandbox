@@ -22,6 +22,7 @@ jobs:
           git switch -c $BRANCH_NAME
           npm version ${{ github.event.inputs.version }} --no-git-tag-version
           git add .
+          git commit -m "Release ${{ github.event.inputs.version }}"
           git push --set-upstream origin $BRANCH_NAME
           git switch main
           gh pr create --base main --head $BRANCH_NAME \
@@ -33,4 +34,4 @@ jobs:
           git push origin ${{ github.event.inputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH_NAME: bot/release-${{ github.event.inputs.version }}
+          BRANCH_NAME: bot/release-${{ github.run_id }}
