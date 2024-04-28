@@ -1,0 +1,24 @@
+{
+  "name": "sandbox",
+  "description": "チュートリアル、本の写経、雑に書いたコードとか",
+  "version": "0.0.1",
+  "author": "nissy-dev <nd.12021218@gmail.com> (https://github.com/nissy-dev)",
+  "bugs": {
+    "url": "https://github.com/nissy-dev/sandbox/issues"
+  },
+  "homepage": "https://github.com/nissy-dev/sandbox",
+  "keywords": [],
+  "license": "MIT",
+  "main": "",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nissy-dev/sandbox.git"
+  },
+  "scripts": {
+    "test": "exit 1"
+  },
+  "dependencies": {
+    "react": "^18.3.1"
+  }
+}

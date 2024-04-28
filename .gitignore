@@ -15,3 +15,5 @@ target
 
 # html
 c10k-exp/large_html/index.html
+
+node_modules/
