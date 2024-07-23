@@ -1,0 +1,11 @@
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: always
+    tty: true
+    privileged: true
+    volumes:
+      - ../:/workspace
+    working_dir: /workspace

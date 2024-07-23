@@ -1,0 +1,14 @@
+{
+  "dockerComposeFile": [
+    "docker-compose.yml"
+  ],
+  "service": "devcontainer",
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "github.copilot"
+      ]
+    }
+  }
+}
