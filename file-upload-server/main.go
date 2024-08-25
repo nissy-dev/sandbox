@@ -1,12 +1,18 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"os/exec"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func saveFileToTempDir(file multipart.File, filename string) (*os.File, error) {
@@ -41,6 +47,8 @@ func (h *FileUploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
+	time.Sleep(6 * time.Second)
+
 	tmpFile, err := saveFileToTempDir(file, handler.Filename)
 	if err != nil {
 		http.Error(w, "Failed to save file to temp directory", http.StatusInternalServerError)
@@ -59,7 +67,26 @@ func (h *FileUploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	server := http.Server{Addr: ":8080"}
+
 	fileUploadHandler := FileUploadHandler{}
 	http.Handle("PUT /upload", &fileUploadHandler)
-	server.ListenAndServe()
+
+	go func() {
+		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("HTTP server error: %v", err)
+		}
+		log.Println("Stopped serving new connections.")
+	}()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
+	defer shutdownRelease()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Fatalf("HTTP shutdown error: %v", err)
+	}
+	log.Println("Graceful shutdown complete.")
 }
