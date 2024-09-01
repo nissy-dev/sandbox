@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -13,6 +13,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func saveFileToTempDir(file multipart.File, filename string) (*os.File, error) {
@@ -27,66 +29,139 @@ func saveFileToTempDir(file multipart.File, filename string) (*os.File, error) {
 }
 
 func unTarFile(tmpFilePath string, destPath string) error {
-	if err := os.RemoveAll(destPath); err != nil {
-		return err
-	}
 	if err := os.MkdirAll(destPath, 0755); err != nil {
 		return err
 	}
 	return exec.Command("tar", "-zxvf", tmpFilePath, "-C", destPath).Run()
 }
 
-type FileUploadHandler struct{}
+type MultiPartFileUploadHandler struct{}
 
-func (h *FileUploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	destPath := r.FormValue("path")
+func (h *MultiPartFileUploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	destPath := r.FormValue("unpack-dir")
 	file, handler, err := r.FormFile("file")
 	if destPath == "" || err != nil {
+		slog.Error(fmt.Sprintf("Invalid request body: %v", err))
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 	defer file.Close()
 
-	time.Sleep(6 * time.Second)
-
 	tmpFile, err := saveFileToTempDir(file, handler.Filename)
 	if err != nil {
+		slog.Error(fmt.Sprintf("Failed to save file to temp directory: %v", err))
 		http.Error(w, "Failed to save file to temp directory", http.StatusInternalServerError)
 		return
 	}
 	defer os.Remove(tmpFile.Name())
 
-	fmt.Fprintf(w, "Create tmp file successfully: %s\n", tmpFile.Name())
+	slog.Info(fmt.Sprintf("Create tmp file successfully: %s\n", tmpFile.Name()))
 
 	if err := unTarFile(tmpFile.Name(), destPath); err != nil {
+		slog.Error(fmt.Sprintf("Failed to untar file: %v", err))
 		http.Error(w, "Failed to untar file", http.StatusInternalServerError)
 		return
 	}
+	slog.Info(fmt.Sprintf("Untar tmp file successfully: %s\n", destPath))
 	fmt.Fprintf(w, "Untar tmp file successfully: %s\n", destPath)
 }
 
-func main() {
-	server := http.Server{Addr: ":8080"}
+type FileUploadHandler struct {
+	ctx context.Context
+}
 
-	fileUploadHandler := FileUploadHandler{}
-	http.Handle("PUT /upload", &fileUploadHandler)
+func (h *FileUploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 
-	go func() {
-		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("HTTP server error: %v", err)
-		}
-		log.Println("Stopped serving new connections.")
-	}()
-
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-	<-sigChan
-
-	shutdownCtx, shutdownRelease := context.WithTimeout(context.Background(), 10*time.Second)
-	defer shutdownRelease()
-
-	if err := server.Shutdown(shutdownCtx); err != nil {
-		log.Fatalf("HTTP shutdown error: %v", err)
+	unpackDir := r.Header.Get("Unpack-Dir")
+	if unpackDir == "" {
+		http.Error(w, "Header Unpack-Dir is missing", http.StatusBadRequest)
+		return
 	}
-	log.Println("Graceful shutdown complete.")
+
+	cmd := exec.Command("tar", "-zxvf", "-", "-C", unpackDir)
+	reader, err := cmd.StdinPipe()
+	defer reader.Close()
+	if err != nil {
+		http.Error(w, "Failed to create pipe", http.StatusInternalServerError)
+		return
+	}
+
+	g, _ := errgroup.WithContext(h.ctx)
+
+	g.Go(func() error {
+		defer reader.Close()
+		if _, err := io.Copy(reader, r.Body); err != nil {
+			slog.Error(fmt.Sprintf("Failed to copy body to pipe: %v", err))
+			return err
+		}
+		return nil
+	})
+
+	g.Go(func() error {
+		if err := cmd.Run(); err != nil {
+			slog.Error(fmt.Sprintf("Failed to tar command: %v", err))
+			return err
+		}
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		http.Error(w, "Failed to upload data", http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "Upload data successfully to %s\n", unpackDir)
+}
+
+func run() error {
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, os.Interrupt)
+	defer stop()
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
+	mux := http.NewServeMux()
+	server := http.Server{Addr: ":8080", Handler: mux}
+
+	mux.Handle("POST /multi-part-upload", &MultiPartFileUploadHandler{})
+	mux.Handle("POST /upload", &FileUploadHandler{ctx: ctx})
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+			slog.Error(fmt.Sprintf("HTTP server error: %v", err))
+			return err
+		}
+		slog.Info("Stopped serving new connections.")
+		return nil
+	})
+
+	g.Go(func() error {
+		<-ctx.Done()
+		slog.Info("Shutting down server...")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := server.Shutdown(ctx); err != nil {
+			slog.Error(fmt.Sprintf("HTTP server error: %v", err))
+			return err
+		}
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		slog.Error(fmt.Sprintf("Error: %v", err))
+		return err
+	}
+
+	slog.Info("Graceful shutdown complete.")
+	return nil
+}
+
+func main() {
+	if err := run(); err != nil {
+		os.Exit(1)
+	}
 }
