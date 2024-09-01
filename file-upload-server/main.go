@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"log/slog"
 	"mime/multipart"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -63,7 +65,7 @@ func (h *MultiPartFileUploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Re
 		return
 	}
 	slog.Info(fmt.Sprintf("Untar tmp file successfully: %s\n", destPath))
-	fmt.Fprintf(w, "Untar tmp file successfully: %s\n", destPath)
+	fmt.Fprintf(w, "Upload data successfully to %s\n", destPath)
 }
 
 type FileUploadHandler struct {
@@ -137,6 +139,10 @@ func run() error {
 		slog.Info("Stopped serving new connections.")
 		return nil
 	})
+
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 
 	g.Go(func() error {
 		<-ctx.Done()
