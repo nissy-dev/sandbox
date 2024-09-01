@@ -81,7 +81,7 @@ func (h *FileUploadHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cmd := exec.Command("tar", "-zxvf", "-", "-C", unpackDir)
+	cmd := exec.Command("tar", "-zxf", "-", "-C", unpackDir)
 	reader, err := cmd.StdinPipe()
 	defer reader.Close()
 	if err != nil {
@@ -124,12 +124,11 @@ func run() error {
 	slog.SetDefault(logger)
 
 	mux := http.NewServeMux()
+	g, ctx := errgroup.WithContext(ctx)
 	server := http.Server{Addr: ":8080", Handler: mux}
 
 	mux.Handle("POST /multi-part-upload", &MultiPartFileUploadHandler{})
 	mux.Handle("POST /upload", &FileUploadHandler{ctx: ctx})
-
-	g, ctx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
 		if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
