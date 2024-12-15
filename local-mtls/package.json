@@ -1,0 +1,15 @@
+{
+  "name": "local-tls",
+  "version": "0.0.1",
+  "author": "nissy-dev <nd.12021218@gmail.com> (https://github.com/nissy-dev)",
+  "keywords": [],
+  "license": "MIT",
+  "main": "",
+  "private": true,
+  "scripts": {
+    "test": "exit 1"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
