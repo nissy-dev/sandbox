@@ -1,0 +1,11 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../prisma-post-database/post-database-client-types"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PPG_POST_DATABASE_URL")
+  schemas  = ["posts", "users"]
+}
