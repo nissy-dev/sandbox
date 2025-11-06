@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"sync"
 
-	pb "github.com/nissy-dev/k8s-playground/go-grpc-red-method/proto/gen/go/proto"
+	pb "github.com/nissy-dev/sandbox/go-grpc-red-method/proto/gen/go/proto"
 )
 
 type SampleService struct {

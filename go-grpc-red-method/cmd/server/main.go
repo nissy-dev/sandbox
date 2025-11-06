@@ -7,10 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/nissy-dev/k8s-playground/go-grpc-red-method/internal/grpc"
-	"github.com/nissy-dev/k8s-playground/go-grpc-red-method/internal/metrics"
-	"github.com/nissy-dev/k8s-playground/go-grpc-red-method/internal/service"
-	pb "github.com/nissy-dev/k8s-playground/go-grpc-red-method/proto/gen/go/proto"
+	"github.com/nissy-dev/sandbox/go-grpc-red-method/internal/grpc"
+	"github.com/nissy-dev/sandbox/go-grpc-red-method/internal/metrics"
+	"github.com/nissy-dev/sandbox/go-grpc-red-method/internal/service"
+	pb "github.com/nissy-dev/sandbox/go-grpc-red-method/proto/gen/go/proto"
+	"google.golang.org/grpc/reflection"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -30,11 +31,16 @@ func main() {
 	signalCtx, cancel := signal.NotifyContext(context.Background(), stopSignals...)
 	defer cancel()
 
-	grpcServer := grpc.NewServer(8080)
-	metricsServer := metrics.NewServer(8081)
+	grpcServer, grpcServerMetrics := grpc.NewServer(8080)
+	metricsServer, prometheusRegistry := metrics.NewServer(8081)
+	// gRPC server の metrics を Prometheus registry に登録する
+	prometheusRegistry.MustRegister(grpcServerMetrics)
 
 	sampleService := service.NewSampleService()
 	pb.RegisterSampleServiceServer(grpcServer, sampleService)
+
+	// reflection を有効化しておく
+	reflection.Register(grpcServer)
 
 	eg, egCtx := errgroup.WithContext(signalCtx)
 	eg.Go(func() error {

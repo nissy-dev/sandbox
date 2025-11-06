@@ -25,11 +25,12 @@ type Server struct {
 	server *http.Server
 }
 
-func NewServer(port uint16) *Server {
+func NewServer(port uint16) (*Server, *prometheus.Registry) {
 	mux := http.NewServeMux()
+	registry := prometheus.NewRegistry()
 	mux.Handle("/metrics", promhttp.HandlerFor(
 		// custom metrics を実装する場合はこの Registry に登録する
-		prometheus.NewRegistry(),
+		registry,
 		promhttp.HandlerOpts{
 			// errorlog を slog に対応させる
 			ErrorLog: &promLogger{},
@@ -41,17 +42,17 @@ func NewServer(port uint16) *Server {
 		Addr:    fmt.Sprintf(":%d", port),
 		Handler: mux,
 	}
-	return &Server{server: server}
+	return &Server{server: server}, registry
 }
 
 func (s *Server) Serve(ctx context.Context) error {
 	eg, egCtx := errgroup.WithContext(ctx)
 
 	eg.Go(func() error {
+		slog.Info(fmt.Sprintf("metrics server started on %s", s.server.Addr))
 		if err := s.server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			return fmt.Errorf("metrics: failed to start the server %v", err)
 		}
-		slog.Info(fmt.Sprintf("metrics server started on %s", s.server.Addr))
 		return nil
 	})
 

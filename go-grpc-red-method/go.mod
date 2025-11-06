@@ -1,4 +1,4 @@
-module github.com/nissy-dev/k8s-playground/go-grpc-red-method
+module github.com/nissy-dev/sandbox/go-grpc-red-method
 
 go 1.25.3
 
@@ -9,7 +9,7 @@ require (
 	google.golang.org/protobuf v1.36.8
 )
 
-require github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2 // indirect
+require github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.2
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect

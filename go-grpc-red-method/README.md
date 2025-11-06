@@ -2,8 +2,15 @@
 
 https://zenn.dev/nissy_dev/scraps/24bafcf85a9d07
 
-## TODO
+## ダッシュボードを見る手順
 
-- go-middleware を使った grpc のログの設定
-- k6 でのリクエストをかける
-- metrics の scrape と grafana での可視化
+```sh
+// server の起動
+make run
+
+// grafana と prometheus のセットアップ
+make setup-infra
+
+// k6 で負荷をかける
+make load-test
+```

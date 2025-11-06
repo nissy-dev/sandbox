@@ -1,4 +1,4 @@
-.PHONY: proto build run test clean
+.PHONY: build run setup-infra clean k6-load-test
 
 proto:
 	@echo "Generating proto files..."
@@ -18,12 +18,15 @@ run: build
 	@echo "Starting server..."
 	@./bin/server
 
-# Run tests
-test:
-	@echo "Running tests..."
-	@go test -race -v ./...
+setup-infra:
+	@echo "Starting prometheus and grafana..."
+	@docker compose -f infra/compose.yml up
 
 clean:
 	@echo "Cleaning..."
 	@rm -rf bin/
 	@rm -rf proto/gen/
+
+k6-load-test:
+	@docker run --rm --network host -v ./infra/k6:/scripts \
+		grafana/k6:latest run /scripts/script.js
