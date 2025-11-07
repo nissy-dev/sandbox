@@ -188,8 +188,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 8
+        "x": 12,
+        "y": 0
       },
       "id": 2,
       "options": {
@@ -286,7 +286,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 8
       },
       "id": 3,
       "options": {
@@ -307,6 +307,7 @@
         {
           "editorMode": "code",
           "expr": "rate(grpc_server_handling_seconds_sum{}[1m]) / rate(grpc_server_handling_seconds_count{}[1m])",
+          "interval": "5s",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
