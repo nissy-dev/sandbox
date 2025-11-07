@@ -12,5 +12,5 @@ make run
 make setup-infra
 
 // k6 で負荷をかける
-make load-test
+make k6-load-test
 ```
