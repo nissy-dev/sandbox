@@ -1,4 +1,4 @@
-.PHONY: build run setup-infra clean k6-load-test
+.PHONY: build run setup-infra teardown-infra clean k6-load-test
 
 proto:
 	@echo "Generating proto files..."
@@ -20,7 +20,11 @@ run: build
 
 setup-infra:
 	@echo "Starting prometheus and grafana..."
-	@docker compose -f infra/compose.yml up
+	@docker compose -f infra/compose.yml up -d
+
+teardown-infra:
+	@echo "Stopping prometheus and grafana..."
+	@docker compose -f infra/compose.yml down -v
 
 clean:
 	@echo "Cleaning..."
