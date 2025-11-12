@@ -44,3 +44,7 @@ run-clientset:
 .PHONY: run-dynamic-client
 run-dynamic-client:
 	@go run cmd/dynamic-client/main.go
+
+.PHONY: run-controller-runtime
+run-controller-runtime:
+	@go run cmd/controller-runtime/main.go
