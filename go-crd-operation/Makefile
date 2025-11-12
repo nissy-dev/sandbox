@@ -40,3 +40,7 @@ codegen:
 .PHONY: run-clientset
 run-clientset:
 	@go run cmd/clientset/main.go
+
+.PHONY: run-dynamic-client
+run-dynamic-client:
+	@go run cmd/dynamic-client/main.go
