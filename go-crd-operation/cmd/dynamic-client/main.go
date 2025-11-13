@@ -55,6 +55,10 @@ func main() {
 	resourceNames := []string{"sample-resource-1", "sample-resource-2", "sample-resource-3"}
 	for i, name := range resourceNames {
 		resource := &examplev1.MyResource{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "example.com/v1",
+				Kind:       "MyResource",
+			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      name,
 				Namespace: namespace,
