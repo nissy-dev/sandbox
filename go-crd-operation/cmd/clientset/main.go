@@ -42,7 +42,6 @@ func main() {
 	ctx := context.Background()
 
 	// カスタムリソースを複数作成
-	fmt.Println("Creating MyResources...")
 	resourceNames := []string{"sample-resource-1", "sample-resource-2", "sample-resource-3"}
 
 	for i, name := range resourceNames {
@@ -57,25 +56,19 @@ func main() {
 			},
 		}
 
-		created, err := client.ExampleV1().MyResources(namespace).Create(ctx, resource, metav1.CreateOptions{})
+		_, err := client.ExampleV1().MyResources(namespace).Create(ctx, resource, metav1.CreateOptions{})
 		if err != nil {
-			fmt.Printf("Failed to create %s: %v\n", name, err)
 			continue
 		}
-		fmt.Printf("Created: %s\n", created.Name)
 	}
 
 	// リソース一覧を取得
 	time.Sleep(2 * time.Second)
-	fmt.Println("\nListing MyResources...")
 
 	resourceList, err := client.ExampleV1().MyResources(namespace).List(ctx, metav1.ListOptions{})
 	if err != nil {
-		fmt.Printf("Error listing resources: %v\n", err)
 		os.Exit(1)
 	}
-
-	fmt.Printf("Found %d resources:\n", len(resourceList.Items))
 	for _, item := range resourceList.Items {
 		fmt.Printf("  - Name: %s, Field1: %s, Field2: %d\n",
 			item.Name, item.Spec.Field1, item.Spec.Field2)
@@ -83,16 +76,11 @@ func main() {
 
 	// 作成したリソースを削除
 	time.Sleep(2 * time.Second)
-	fmt.Println("\nDeleting MyResources...")
 
 	for _, name := range resourceNames {
 		err := client.ExampleV1().MyResources(namespace).Delete(ctx, name, metav1.DeleteOptions{})
 		if err != nil {
-			fmt.Printf("Failed to delete %s: %v\n", name, err)
 			continue
 		}
-		fmt.Printf("Deleted: %s\n", name)
 	}
-
-	fmt.Println("\nCompleted!")
 }
