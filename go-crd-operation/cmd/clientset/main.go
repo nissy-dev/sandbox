@@ -43,7 +43,6 @@ func main() {
 
 	// カスタムリソースを複数作成
 	resourceNames := []string{"sample-resource-1", "sample-resource-2", "sample-resource-3"}
-
 	for i, name := range resourceNames {
 		resource := &examplev1.MyResource{
 			ObjectMeta: metav1.ObjectMeta{

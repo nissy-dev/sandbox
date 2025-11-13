@@ -8,8 +8,10 @@ import (
 	"path/filepath"
 	"time"
 
+	examplev1 "github.com/nissy-dev/sandbox/go-crd-operation/pkg/apis/example.com/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/clientcmd"
@@ -51,24 +53,22 @@ func main() {
 
 	// カスタムリソースを複数作成
 	resourceNames := []string{"sample-resource-1", "sample-resource-2", "sample-resource-3"}
-
 	for i, name := range resourceNames {
-		resource := &unstructured.Unstructured{
-			Object: map[string]interface{}{
-				"apiVersion": "example.com/v1",
-				"kind":       "MyResource",
-				"metadata": map[string]interface{}{
-					"name":      name,
-					"namespace": namespace,
-				},
-				"spec": map[string]interface{}{
-					"field1": fmt.Sprintf("value-%d", i+1),
-					"field2": (i + 1) * 100,
-				},
+		resource := &examplev1.MyResource{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: namespace,
+			},
+			Spec: examplev1.MyResourceSpec{
+				Field1: fmt.Sprintf("value-%d", i+1),
+				Field2: int32((i + 1) * 100),
 			},
 		}
-
-		_, err := resourceClient.Create(ctx, resource, metav1.CreateOptions{})
+		unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(resource)
+		if err != nil {
+			continue
+		}
+		_, err = resourceClient.Create(ctx, &unstructured.Unstructured{Object: unstructuredObj}, metav1.CreateOptions{})
 		if err != nil {
 			continue
 		}
@@ -82,13 +82,14 @@ func main() {
 		os.Exit(1)
 	}
 	for _, item := range resourceList.Items {
-		name := item.GetName()
-		spec, found, _ := unstructured.NestedMap(item.Object, "spec")
-		if found {
-			field1, _, _ := unstructured.NestedString(spec, "field1")
-			field2, _, _ := unstructured.NestedInt64(spec, "field2")
-			fmt.Printf("  - Name: %s, Field1: %s, Field2: %d\n", name, field1, field2)
+		var myResource examplev1.MyResource
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(item.Object, &myResource)
+		if err != nil {
+			fmt.Printf("Error converting from unstructured: %v\n", err)
+			continue
 		}
+		fmt.Printf("  - Name: %s, Field1: %s, Field2: %d\n",
+			myResource.Name, myResource.Spec.Field1, myResource.Spec.Field2)
 	}
 
 	// 作成したリソースを削除
