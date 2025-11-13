@@ -29,13 +29,11 @@ func main() {
 	// クライアントの作成
 	cfg, err := clientcmd.BuildConfigFromFlags("", *kubeconfigPath)
 	if err != nil {
-		fmt.Printf("Error building config: %v\n", err)
 		os.Exit(1)
 	}
 
 	client, err := clientset.NewForConfig(cfg)
 	if err != nil {
-		fmt.Printf("Error creating clientset: %v\n", err)
 		os.Exit(1)
 	}
 

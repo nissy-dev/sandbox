@@ -38,13 +38,11 @@ func main() {
 	// Dynamic clientの作成
 	cfg, err := clientcmd.BuildConfigFromFlags("", *kubeconfigPath)
 	if err != nil {
-		fmt.Printf("Error building config: %v\n", err)
 		os.Exit(1)
 	}
 
 	dynamicClient, err := dynamic.NewForConfig(cfg)
 	if err != nil {
-		fmt.Printf("Error creating dynamic client: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -89,7 +87,6 @@ func main() {
 		var myResource examplev1.MyResource
 		err := runtime.DefaultUnstructuredConverter.FromUnstructured(item.Object, &myResource)
 		if err != nil {
-			fmt.Printf("Error converting from unstructured: %v\n", err)
 			continue
 		}
 		fmt.Printf("  - Name: %s, Field1: %s, Field2: %d\n",
