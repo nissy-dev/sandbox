@@ -22,6 +22,8 @@ func main() {
 	cfg, _ := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
 	client, _ := clientset.NewForConfig(cfg)
 
+	resourceClient := client.ExampleV1().MyResources(namespace)
+
 	// カスタムリソースを複数作成
 	resourceNames := []string{"sample-resource-1", "sample-resource-2", "sample-resource-3"}
 	for i, name := range resourceNames {
@@ -35,11 +37,11 @@ func main() {
 				Field2: int32((i + 1) * 100),
 			},
 		}
-		_, _ = client.ExampleV1().MyResources(namespace).Create(ctx, resource, metav1.CreateOptions{})
+		_, _ = resourceClient.Create(ctx, resource, metav1.CreateOptions{})
 	}
 
 	// リソース一覧を取得
-	resourceList, _ := client.ExampleV1().MyResources(namespace).List(ctx, metav1.ListOptions{})
+	resourceList, _ := resourceClient.List(ctx, metav1.ListOptions{})
 	for _, item := range resourceList.Items {
 		fmt.Printf("  - Name: %s, Field1: %s, Field2: %d\n",
 			item.Name, item.Spec.Field1, item.Spec.Field2)
@@ -47,6 +49,6 @@ func main() {
 
 	// 作成したリソースを削除
 	for _, name := range resourceNames {
-		_ = client.ExampleV1().MyResources(namespace).Delete(ctx, name, metav1.DeleteOptions{})
+		_ = resourceClient.Delete(ctx, name, metav1.DeleteOptions{})
 	}
 }
