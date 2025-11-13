@@ -2,11 +2,8 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
-	"os"
 	"path/filepath"
-	"time"
 
 	examplev1 "github.com/nissy-dev/sandbox/go-crd-operation/pkg/apis/example.com/v1"
 	clientset "github.com/nissy-dev/sandbox/go-crd-operation/pkg/generated/clientset/versioned"
@@ -18,26 +15,12 @@ import (
 const namespace = "default"
 
 func main() {
-	var kubeconfigPath *string
-	if home := homedir.HomeDir(); home != "" {
-		kubeconfigPath = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "kubeconfig file path")
-	} else {
-		kubeconfigPath = flag.String("kubeconfig", "", "kubeconfig file path")
-	}
-	flag.Parse()
+	ctx := context.Background()
 
 	// クライアントの作成
-	cfg, err := clientcmd.BuildConfigFromFlags("", *kubeconfigPath)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	client, err := clientset.NewForConfig(cfg)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	ctx := context.Background()
+	kubeconfigPath := filepath.Join(homedir.HomeDir(), ".kube", "config")
+	cfg, _ := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	client, _ := clientset.NewForConfig(cfg)
 
 	// カスタムリソースを複数作成
 	resourceNames := []string{"sample-resource-1", "sample-resource-2", "sample-resource-3"}
@@ -52,32 +35,18 @@ func main() {
 				Field2: int32((i + 1) * 100),
 			},
 		}
-
-		_, err := client.ExampleV1().MyResources(namespace).Create(ctx, resource, metav1.CreateOptions{})
-		if err != nil {
-			continue
-		}
+		_, _ = client.ExampleV1().MyResources(namespace).Create(ctx, resource, metav1.CreateOptions{})
 	}
 
 	// リソース一覧を取得
-	time.Sleep(2 * time.Second)
-
-	resourceList, err := client.ExampleV1().MyResources(namespace).List(ctx, metav1.ListOptions{})
-	if err != nil {
-		os.Exit(1)
-	}
+	resourceList, _ := client.ExampleV1().MyResources(namespace).List(ctx, metav1.ListOptions{})
 	for _, item := range resourceList.Items {
 		fmt.Printf("  - Name: %s, Field1: %s, Field2: %d\n",
 			item.Name, item.Spec.Field1, item.Spec.Field2)
 	}
 
 	// 作成したリソースを削除
-	time.Sleep(2 * time.Second)
-
 	for _, name := range resourceNames {
-		err := client.ExampleV1().MyResources(namespace).Delete(ctx, name, metav1.DeleteOptions{})
-		if err != nil {
-			continue
-		}
+		_ = client.ExampleV1().MyResources(namespace).Delete(ctx, name, metav1.DeleteOptions{})
 	}
 }

@@ -2,11 +2,8 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
-	"os"
 	"path/filepath"
-	"time"
 
 	examplev1 "github.com/nissy-dev/sandbox/go-crd-operation/pkg/apis/example.com/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,26 +24,13 @@ var myResourceGVR = schema.GroupVersionResource{
 }
 
 func main() {
-	var kubeconfigPath *string
-	if home := homedir.HomeDir(); home != "" {
-		kubeconfigPath = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "kubeconfig file path")
-	} else {
-		kubeconfigPath = flag.String("kubeconfig", "", "kubeconfig file path")
-	}
-	flag.Parse()
+	ctx := context.Background()
 
 	// Dynamic clientの作成
-	cfg, err := clientcmd.BuildConfigFromFlags("", *kubeconfigPath)
-	if err != nil {
-		os.Exit(1)
-	}
+	kubeconfigPath := filepath.Join(homedir.HomeDir(), ".kube", "config")
+	cfg, _ := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	dynamicClient, _ := dynamic.NewForConfig(cfg)
 
-	dynamicClient, err := dynamic.NewForConfig(cfg)
-	if err != nil {
-		os.Exit(1)
-	}
-
-	ctx := context.Background()
 	resourceClient := dynamicClient.Resource(myResourceGVR).Namespace(namespace)
 
 	// カスタムリソースを複数作成
@@ -66,40 +50,21 @@ func main() {
 				Field2: int32((i + 1) * 100),
 			},
 		}
-		unstructuredObj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(resource)
-		if err != nil {
-			continue
-		}
-		_, err = resourceClient.Create(ctx, &unstructured.Unstructured{Object: unstructuredObj}, metav1.CreateOptions{})
-		if err != nil {
-			continue
-		}
+		unstructuredObj, _ := runtime.DefaultUnstructuredConverter.ToUnstructured(resource)
+		_, _ = resourceClient.Create(ctx, &unstructured.Unstructured{Object: unstructuredObj}, metav1.CreateOptions{})
 	}
 
 	// リソース一覧を取得
-	time.Sleep(2 * time.Second)
-
-	resourceList, err := resourceClient.List(ctx, metav1.ListOptions{})
-	if err != nil {
-		os.Exit(1)
-	}
+	resourceList, _ := resourceClient.List(ctx, metav1.ListOptions{})
 	for _, item := range resourceList.Items {
 		var myResource examplev1.MyResource
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(item.Object, &myResource)
-		if err != nil {
-			continue
-		}
+		_ = runtime.DefaultUnstructuredConverter.FromUnstructured(item.Object, &myResource)
 		fmt.Printf("  - Name: %s, Field1: %s, Field2: %d\n",
 			myResource.Name, myResource.Spec.Field1, myResource.Spec.Field2)
 	}
 
 	// 作成したリソースを削除
-	time.Sleep(2 * time.Second)
-
 	for _, name := range resourceNames {
-		err := resourceClient.Delete(ctx, name, metav1.DeleteOptions{})
-		if err != nil {
-			continue
-		}
+		_ = resourceClient.Delete(ctx, name, metav1.DeleteOptions{})
 	}
 }
