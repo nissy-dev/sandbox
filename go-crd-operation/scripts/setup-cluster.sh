@@ -2,10 +2,9 @@
 set -e
 
 CLUSTER_NAME="crd-demo"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "Creating kind cluster: ${CLUSTER_NAME}..."
-kind create cluster --config "${SCRIPT_DIR}/kind-config.yaml"
+kind create cluster --name ${CLUSTER_NAME}
 
 echo "Waiting for cluster to be ready..."
 kubectl wait --for=condition=Ready nodes --all --timeout=60s

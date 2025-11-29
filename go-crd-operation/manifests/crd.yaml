@@ -29,5 +29,3 @@ spec:
     plural: myresources
     singular: myresource
     kind: MyResource
-    shortNames:
-      - mr

@@ -32,10 +32,8 @@ delete-crd:
 
 .PHONY: codegen
 codegen:
-	@go get k8s.io/code-generator
 	@echo "Generating code for CRD..."
 	@scripts/update-codegen.sh
-	@go mod tidy
 
 .PHONY: run-clientset
 run-clientset:
