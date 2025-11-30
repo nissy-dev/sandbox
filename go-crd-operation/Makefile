@@ -33,7 +33,7 @@ delete-crd:
 .PHONY: codegen
 codegen:
 	@echo "Generating code for CRD..."
-	@scripts/update-codegen.sh
+	@scripts/codegen.sh
 
 .PHONY: run-clientset
 run-clientset:
