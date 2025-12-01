@@ -62,7 +62,7 @@ func main() {
 
 	// リソース一覧を取得
 	resourceList := &examplev1.MyResourceList{}
-	_ = k8sClient.List(ctx, resourceList, client.InNamespace(namespace))
+	_ = k8sClient.List(ctx, resourceList)
 	for _, item := range resourceList.Items {
 		fmt.Printf("  - Name: %s, Field1: %s, Field2: %d\n",
 			item.Name, item.Spec.Field1, item.Spec.Field2)
