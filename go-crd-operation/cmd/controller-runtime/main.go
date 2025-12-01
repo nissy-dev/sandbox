@@ -8,6 +8,7 @@ import (
 	examplev1 "github.com/nissy-dev/sandbox/go-crd-operation/pkg/apis/example.com/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -15,12 +16,28 @@ import (
 
 const namespace = "default"
 
+var SchemeGroupVersion = schema.GroupVersion{
+	Group:   "example.com",
+	Version: "v1",
+}
+
+func addKnownTypes(scheme *runtime.Scheme) error {
+	scheme.AddKnownTypes(
+		SchemeGroupVersion,
+		&examplev1.MyResource{},
+		&examplev1.MyResourceList{},
+	)
+	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
+	return nil
+}
+
 func main() {
 	ctx := context.Background()
 
-	// Schemeの作成
+	// Scheme の作成（型を登録）
 	scheme := runtime.NewScheme()
-	_ = examplev1.Install(scheme)
+	schemeBuilder := runtime.NewSchemeBuilder(addKnownTypes)
+	schemeBuilder.AddToScheme(scheme)
 
 	// controller-runtime clientの作成
 	kubeconfigPath := filepath.Join(homedir.HomeDir(), ".kube", "config")
