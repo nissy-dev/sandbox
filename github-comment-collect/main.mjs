@@ -7,12 +7,27 @@ const REPO_OWNER = process.env.REPO_OWNER || "biomejs";
 const REPO_NAME = process.env.REPO_NAME || "biome";
 const USERNAME = process.env.GITHUB_USERNAME || "nissy-dev"; // 自分のGitHubユーザー名
 
+// 無視したいユーザーのリスト
+const IGNORED_USERS = [
+  USERNAME, // 自分のコメント
+  "github-actions[bot]",
+  "dependabot[bot]",
+  "renovate[bot]",
+  // 他にも無視したいユーザーがあれば追加
+  "Copilot",
+];
+
 if (!GITHUB_TOKEN) {
   console.error("Error: GITHUB_TOKEN environment variable is required");
   process.exit(1);
 }
 
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
+
+// コメント/レビューをフィルタリングする共通関数
+function filterComments(items) {
+  return items.filter((item) => !IGNORED_USERS.includes(item.user.login));
+}
 
 async function getMyPullRequests() {
   console.log(`Fetching PRs for ${REPO_OWNER}/${REPO_NAME}...`);
@@ -22,15 +37,13 @@ async function getMyPullRequests() {
   let hasMore = true;
 
   while (hasMore) {
-    const { data: pullRequests } = await octokit.pulls.list({
-      owner: REPO_OWNER,
-      repo: REPO_NAME,
-      state: "closed",
-      head: `user:${USERNAME}`,
+    const query = `is:pr repo:${REPO_OWNER}/${REPO_NAME} author:${USERNAME}`;
+    const res = await octokit.rest.search.issuesAndPullRequests({
+      q: query,
       per_page: 100,
       page,
     });
-
+    const pullRequests = res.data.items;
     allPullRequests = allPullRequests.concat(pullRequests);
     console.log(`Fetched page ${page}: ${pullRequests.length} PRs`);
 
@@ -42,11 +55,7 @@ async function getMyPullRequests() {
   }
 
   console.log(`Total PRs fetched: ${allPullRequests.length}`);
-
-  console.log(allPullRequests);
-
-  // 自分が作成したPRのみをフィルタ
-  return allPullRequests.filter((pr) => pr.user.login === USERNAME);
+  return allPullRequests;
 }
 
 async function getReviewComments(prNumber) {
@@ -59,23 +68,21 @@ async function getReviewComments(prNumber) {
     per_page: 100,
   });
 
-  // 自分のコメントを除外
-  return reviewComments.filter((comment) => comment.user.login !== USERNAME);
+  return filterComments(reviewComments);
 }
 
-async function getReviews(prNumber) {
-  console.log(`Fetching reviews for PR #${prNumber}...`);
+// async function getReviews(prNumber) {
+//   console.log(`Fetching reviews for PR #${prNumber}...`);
 
-  const { data: reviews } = await octokit.pulls.listReviews({
-    owner: REPO_OWNER,
-    repo: REPO_NAME,
-    pull_number: prNumber,
-    per_page: 100,
-  });
+//   const { data: reviews } = await octokit.pulls.listReviews({
+//     owner: REPO_OWNER,
+//     repo: REPO_NAME,
+//     pull_number: prNumber,
+//     per_page: 100,
+//   });
 
-  // 自分のレビューを除外
-  return reviews.filter((review) => review.user.login !== USERNAME);
-}
+//   return filterComments(reviews);
+// }
 
 async function getIssueComments(prNumber) {
   console.log(`Fetching issue comments for PR #${prNumber}...`);
@@ -87,8 +94,7 @@ async function getIssueComments(prNumber) {
     per_page: 100,
   });
 
-  // 自分のコメントを除外
-  return comments.filter((comment) => comment.user.login !== USERNAME);
+  return filterComments(comments);
 }
 
 function generateMarkdown(prs, prComments) {
@@ -106,10 +112,6 @@ function generateMarkdown(prs, prComments) {
     markdown += `**State**: ${pr.state}\n`;
     markdown += `**Created**: ${pr.created_at}\n`;
     markdown += `**Updated**: ${pr.updated_at}\n\n`;
-
-    if (pr.body) {
-      markdown += `### Description\n\n${pr.body}\n\n`;
-    }
 
     // Review comments (コードに対するコメント)
     if (comments.reviewComments.length > 0) {
@@ -130,17 +132,18 @@ function generateMarkdown(prs, prComments) {
       }
     }
 
-    // Reviews (Approve, Request Changes, Comment)
-    if (comments.reviews.length > 0) {
-      markdown += `### Reviews (${comments.reviews.length})\n\n`;
-      for (const review of comments.reviews) {
-        markdown += `#### ${review.user.login} - ${review.state} - ${review.submitted_at}\n`;
-        if (review.body) {
-          markdown += `\n${review.body}\n`;
-        }
-        markdown += `\n---\n\n`;
-      }
-    }
+    // // Reviews (Approve, Request Changes, Comment)
+    // if (comments.reviews.length > 0) {
+    //   markdown += `### Reviews (${comments.reviews.length})\n\n`;
+    //   for (const review of comments.reviews) {
+    //     if (review)
+    //     markdown += `#### ${review.user.login} - ${review.state} - ${review.submitted_at}\n`;
+    //     if (review.body) {
+    //       markdown += `\n${review.body}\n`;
+    //     }
+    //     markdown += `\n---\n\n`;
+    //   }
+    // }
 
     // Issue comments (PRの会話コメント)
     if (comments.issueComments.length > 0) {
@@ -174,13 +177,13 @@ async function main() {
     for (const pr of myPRs) {
       const [reviewComments, reviews, issueComments] = await Promise.all([
         getReviewComments(pr.number),
-        getReviews(pr.number),
+        // getReviews(pr.number),
         getIssueComments(pr.number),
       ]);
 
       prComments[pr.number] = {
         reviewComments,
-        reviews,
+        // reviews,
         issueComments,
       };
     }
