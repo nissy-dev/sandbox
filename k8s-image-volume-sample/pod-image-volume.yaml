@@ -1,0 +1,23 @@
+# Pod using image volume: node runtime + script image (dist) mounted at /app.
+# Replace IMAGE_REFERENCE with your script image (e.g. ghcr.io/owner/repo/app-dist:sha-xxx).
+# Requires Kubernetes 1.31+ with ImageVolume feature (beta in 1.35).
+apiVersion: v1
+kind: Pod
+metadata:
+  name: k8s-image-volume-sample
+spec:
+  containers:
+    - name: app
+      image: node:20-alpine
+      command: ["node", "/app/main.js"]
+      volumeMounts:
+        - name: app-dist
+          mountPath: /app
+      env:
+        - name: PORT
+          value: "3000"
+  volumes:
+    - name: app-dist
+      image:
+        reference: IMAGE_REFERENCE
+        pullPolicy: IfNotPresent

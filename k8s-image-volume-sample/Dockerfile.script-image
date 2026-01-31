@@ -1,0 +1,4 @@
+# Dist-only image for image volume. Build after `pnpm run build`.
+# No runtime; content is mounted read-only into node container.
+FROM scratch
+COPY dist/ /app/
