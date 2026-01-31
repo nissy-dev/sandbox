@@ -73,6 +73,10 @@ jobs:
         working-directory: ${{ env.SAMPLE_DIR }}
         run: pnpm install --frozen-lockfile
 
+      - name: Lint
+        working-directory: ${{ env.SAMPLE_DIR }}
+        run: pnpm run lint
+
       - name: Build dist
         working-directory: ${{ env.SAMPLE_DIR }}
         run: pnpm run build

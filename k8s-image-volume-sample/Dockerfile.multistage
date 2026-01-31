@@ -1,11 +1,13 @@
-# Stage 1: build
+# Stage 1: build (NestJS + ESLint + Prettier; lint in image to increase build weight)
 FROM node:20-alpine AS builder
 WORKDIR /app
 RUN corepack enable pnpm
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY src ./src
-COPY tsconfig.json ./
+COPY tsconfig.json tsconfig.build.json nest-cli.json ./
+COPY eslint.config.mjs .prettierrc ./
+RUN pnpm run lint
 RUN pnpm run build
 
 # Stage 2: runtime

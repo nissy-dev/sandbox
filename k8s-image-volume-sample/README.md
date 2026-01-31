@@ -1,6 +1,6 @@
 # k8s image volume vs multi-stage build sample
 
-Sample Node+TypeScript app to compare CI build time between:
+Sample NestJS + TypeScript app (ESLint, Prettier) to compare CI build time between:
 
 1. **Multi-stage build**: single image built with `Dockerfile.multistage`
 2. **Image volume**: runtime = `node:20-alpine`, script = separate image with `dist/` only, mounted as volume
