@@ -1,0 +1,114 @@
+name: k8s image volume vs multi-stage build comparison
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "k8s-image-volume-sample/**"
+      - ".github/workflows/k8s-image-volume-compare.yaml"
+  workflow_dispatch:
+
+env:
+  SAMPLE_DIR: k8s-image-volume-sample
+
+jobs:
+  build-multistage:
+    runs-on: ubuntu-latest
+    outputs:
+      duration_sec: ${{ steps.record_end.outputs.duration_sec }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Record start time
+        id: record_start
+        run: echo "start_ts=$(date +%s)" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build multi-stage image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.SAMPLE_DIR }}
+          file: ${{ env.SAMPLE_DIR }}/Dockerfile.multistage
+          push: false
+          load: true
+          tags: k8s-image-volume-sample:multistage
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Record build duration
+        id: record_end
+        run: |
+          end_ts=$(date +%s)
+          start_ts=${{ steps.record_start.outputs.start_ts }}
+          echo "duration_sec=$((end_ts - start_ts))" >> $GITHUB_OUTPUT
+          echo "Multi-stage build duration: $((end_ts - start_ts))s"
+
+  build-script-image:
+    runs-on: ubuntu-latest
+    outputs:
+      duration_sec: ${{ steps.record_end.outputs.duration_sec }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Record start time
+        id: record_start
+        run: echo "start_ts=$(date +%s)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: ${{ env.SAMPLE_DIR }}/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: ${{ env.SAMPLE_DIR }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Build dist
+        working-directory: ${{ env.SAMPLE_DIR }}
+        run: pnpm run build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build script image (dist only)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.SAMPLE_DIR }}
+          file: ${{ env.SAMPLE_DIR }}/Dockerfile.script-image
+          push: false
+          load: true
+          tags: k8s-image-volume-sample:script
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Record build duration
+        id: record_end
+        run: |
+          end_ts=$(date +%s)
+          start_ts=${{ steps.record_start.outputs.start_ts }}
+          echo "duration_sec=$((end_ts - start_ts))" >> $GITHUB_OUTPUT
+          echo "Script image build duration: $((end_ts - start_ts))s"
+
+  compare:
+    needs: [build-multistage, build-script-image]
+    runs-on: ubuntu-latest
+    if: always() && (needs.build-multistage.result == 'success' && needs.build-script-image.result == 'success')
+    steps:
+      - name: Build time comparison
+        run: |
+          echo "## Build time comparison" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Approach | Duration (sec) |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|----------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Multi-stage | ${{ needs.build-multistage.outputs.duration_sec }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Image volume (script image) | ${{ needs.build-script-image.outputs.duration_sec }} |" >> $GITHUB_STEP_SUMMARY

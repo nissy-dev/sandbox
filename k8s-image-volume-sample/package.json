@@ -1,0 +1,16 @@
+{
+  "name": "k8s-image-volume-sample",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start:prod": "node dist/main.js"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.2.0",
+    "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  }
+}
