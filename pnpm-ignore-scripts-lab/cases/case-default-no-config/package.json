@@ -1,0 +1,8 @@
+{
+  "name": "pnpm-ignore-scripts-lab-case-default-no-config",
+  "private": true,
+  "packageManager": "pnpm@10.23.0",
+  "dependencies": {
+    "test": "file:./deps/test"
+  }
+}

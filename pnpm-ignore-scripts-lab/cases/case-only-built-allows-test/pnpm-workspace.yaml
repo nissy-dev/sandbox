@@ -1,0 +1,7 @@
+packages:
+  - "."
+
+ignoreDepScripts: false
+
+onlyBuiltDependencies:
+  - dummy-never-installed

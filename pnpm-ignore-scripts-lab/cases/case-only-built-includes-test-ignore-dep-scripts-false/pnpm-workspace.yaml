@@ -1,0 +1,7 @@
+packages:
+  - "."
+
+ignoreDepScripts: false
+
+onlyBuiltDependencies:
+  - test

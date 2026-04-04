@@ -1,0 +1,66 @@
+# pnpm v10: dependency postinstall requires onlyBuiltDependencies (or similar) unless using dangerouslyAllowAllBuilds.
+# case-npmrc-ignore-scripts sets ignore-scripts=false in .npmrc and lists test in onlyBuiltDependencies so the marker runs.
+
+name: pnpm ignore-scripts lab
+
+on:
+  workflow_dispatch:
+    inputs:
+      case:
+        description: Run all cases or a single case directory under pnpm-ignore-scripts-lab/cases/
+        type: choice
+        default: all
+        options:
+          - all
+          - case-default-no-config
+          - case-npmrc-ignore-scripts
+          - case-only-built-allows-test
+          - case-only-built-includes-test
+          - case-only-built-includes-test-ignore-dep-scripts-false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - case: case-default-no-config
+            expect_marker: "0"
+          - case: case-npmrc-ignore-scripts
+            expect_marker: "1"
+          - case: case-only-built-allows-test
+            expect_marker: "0"
+          - case: case-only-built-includes-test
+            expect_marker: "1"
+          - case: case-only-built-includes-test-ignore-dep-scripts-false
+            expect_marker: "1"
+    if: ${{ github.event.inputs.case == 'all' || github.event.inputs.case == matrix.case }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Enable pnpm (matches packageManager in cases)
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.23.0 --activate
+          pnpm --version
+
+      - name: pnpm install
+        working-directory: pnpm-ignore-scripts-lab/cases/${{ matrix.case }}
+        run: pnpm install --frozen-lockfile
+
+      # expect_marker: 1 = postinstall must create postinstall-ran.txt at case root (INIT_CWD)
+      - name: Assert postinstall marker
+        working-directory: pnpm-ignore-scripts-lab/cases/${{ matrix.case }}
+        run: |
+          set -euo pipefail
+          if [ "${{ matrix.expect_marker }}" = "1" ]; then
+            test -f postinstall-ran.txt
+            test "$(cat postinstall-ran.txt)" = "ok"
+          else
+            test ! -f postinstall-ran.txt
+          fi
