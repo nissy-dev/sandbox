@@ -3,6 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "postinstall": "node postinstall.js"
+    "postinstall": "echo 'Executed postinstall' && exit 1"
   }
 }

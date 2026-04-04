@@ -9,14 +9,14 @@ importers:
   .:
     dependencies:
       test:
-        specifier: file:./deps/test
-        version: file:deps/test
+        specifier: file:../../deps/test
+        version: file:../../deps/test
 
 packages:
 
-  test@file:deps/test:
-    resolution: {directory: deps/test, type: directory}
+  test@file:../../deps/test:
+    resolution: {directory: ../../deps/test, type: directory}
 
 snapshots:
 
-  test@file:deps/test: {}
+  test@file:../../deps/test: {}

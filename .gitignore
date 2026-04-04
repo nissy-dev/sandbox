@@ -18,8 +18,8 @@ c10k-exp/large_html/index.html
 
 node_modules/
 
-# pnpm-ignore-scripts-lab: committed local dependency fixtures (not under node_modules; pnpm mutates node_modules)
-!pnpm-ignore-scripts-lab/cases/*/deps/
-pnpm-ignore-scripts-lab/cases/*/deps/*
-!pnpm-ignore-scripts-lab/cases/*/deps/test/
-!pnpm-ignore-scripts-lab/cases/*/deps/test/**
+# pnpm-ignore-scripts-lab: shared file dependency (not under each case's node_modules)
+!pnpm-ignore-scripts-lab/deps/
+pnpm-ignore-scripts-lab/deps/*
+!pnpm-ignore-scripts-lab/deps/test/
+!pnpm-ignore-scripts-lab/deps/test/**

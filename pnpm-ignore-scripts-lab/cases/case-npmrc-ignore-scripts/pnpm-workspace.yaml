@@ -1,6 +1,0 @@
-packages:
-  - "."
-
-# pnpm v10: dependency lifecycle scripts still require an allowlist; ignore-scripts=false alone is not enough.
-onlyBuiltDependencies:
-  - test
