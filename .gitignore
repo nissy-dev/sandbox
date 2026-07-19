@@ -17,6 +17,7 @@ target
 c10k-exp/large_html/index.html
 
 node_modules/
+dist
 
 # pnpm-ignore-scripts-lab: shared file dependency (not under each case's node_modules)
 !pnpm-ignore-scripts-lab/deps/

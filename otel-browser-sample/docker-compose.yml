@@ -1,0 +1,23 @@
+services:
+  collector:
+    image: otel/opentelemetry-collector-contrib:0.135.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "4318:4318"
+    depends_on:
+      - lgtm
+    restart: unless-stopped
+
+  lgtm:
+    image: grafana/otel-lgtm:0.29.1
+    ports:
+      - "3000:3000"
+      - "3100:3100"
+    volumes:
+      - lgtm-data:/data
+    restart: unless-stopped
+
+volumes:
+  lgtm-data:
