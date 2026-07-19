@@ -5,10 +5,7 @@
   "scripts": {
     "dev": "vite --open",
     "observability:up": "docker compose up -d",
-    "observability:down": "docker compose down",
-    "build": "tsc && vite build",
-    "check-types": "tsc",
-    "preview": "vite preview"
+    "observability:down": "docker compose down"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.1",

@@ -43,13 +43,14 @@ Fetch/XHRのテスト先とボタンハンドラーは本家と同じ `https://h
 
 - `grafana/otel-lgtm` 内蔵OpenTelemetry Collector
   - ブラウザからのOTLP/HTTPをポート4318で受信
-  - Viteで起動する `http://localhost:5173` だけをCORSで許可
+  - イメージ標準設定のCORS（`http://*`）を使用
   - Logsパイプラインを同一コンテナ内のLokiへ転送
   - Tracesパイプラインを同一コンテナ内のTempoへ転送
-  - Batch Processorではなく、OTLP HTTP Exporterの `sending_queue.batch` で送信をバッチ化
+  - イメージ標準設定のBatch Processorで送信をバッチ化
 - `grafana/otel-lgtm`
   - Collector、Grafana、Loki、Tempoを1コンテナでまとめて起動
-  - Grafanaをポート3000、Loki APIをポート3100で公開
+  - Grafanaをポート3000、OTLP/HTTPをポート4318で公開
+  - LokiとTempoはコンテナ内でのみ利用し、ホストには直接公開しない
   - `lgtm-data` Dockerボリュームへデータを保存
 - Docker Composeの起動・終了用npmスクリプト
   - `npm run observability:up`
@@ -78,16 +79,6 @@ npm run dev
 4. Label filtersで `service_name = otel-browser-with-tracing` を指定して **Run query** を押します。
 
 データが見つからない場合は、時間範囲を **Last 15 minutes** にしてページを再読み込みしてください。
-
-## Loki APIを直接確認
-
-Lokiには単独のWeb UIはありませんが、HTTP APIを `http://localhost:3100` で公開しています。
-
-- Ready確認: `http://localhost:3100/ready`
-- ラベル一覧: `http://localhost:3100/loki/api/v1/labels`
-- サービス一覧: `http://localhost:3100/loki/api/v1/label/service_name/values`
-
-ログの検索・可視化にはGrafanaの **Explore → Loki** を使用してください。
 
 ## Tempoでトレースを確認
 
