@@ -6,9 +6,9 @@
 
 ```mermaid
 flowchart LR
-	Browser[Browser sample] -->|OTLP/HTTP logs and traces| Collector[OpenTelemetry Collector]
-	Collector -->|logs| Loki
-	Collector -->|traces| Tempo
+  Browser[Browser sample] -->|OTLP/HTTP logs and traces| Collector[LGTM内蔵 OpenTelemetry Collector]
+  Collector -->|logs| Loki
+  Collector -->|traces| Tempo
 	Loki --> Grafana
 	Tempo --> Grafana
 ```
@@ -39,15 +39,16 @@ Fetch/XHRのテスト先とボタンハンドラーは本家と同じ `https://h
 
 ### ローカル観測基盤の追加
 
-本家にはCollectorやバックエンドが含まれないため、次を追加しました。
+本家にはCollectorやバックエンドが含まれないため、`grafana/otel-lgtm` を追加しました。このイメージはGrafana、Loki、Tempoに加えてOpenTelemetry Collectorも内蔵しているため、Collectorを別コンテナでは起動していません。
 
-- OpenTelemetry Collector Contrib
+- `grafana/otel-lgtm` 内蔵OpenTelemetry Collector
   - ブラウザからのOTLP/HTTPをポート4318で受信
-  - `http://localhost:5173` と `http://127.0.0.1:5173` のCORSを許可
-  - LogsパイプラインをGrafana LGTM内のLokiへ転送
-  - TracesパイプラインをGrafana LGTM内のTempoへ転送
+  - Viteで起動する `http://localhost:5173` だけをCORSで許可
+  - Logsパイプラインを同一コンテナ内のLokiへ転送
+  - Tracesパイプラインを同一コンテナ内のTempoへ転送
+  - Batch Processorではなく、OTLP HTTP Exporterの `sending_queue.batch` で送信をバッチ化
 - `grafana/otel-lgtm`
-  - Grafana、Loki、Tempoをローカルでまとめて起動
+  - Collector、Grafana、Loki、Tempoを1コンテナでまとめて起動
   - Grafanaをポート3000、Loki APIをポート3100で公開
   - `lgtm-data` Dockerボリュームへデータを保存
 - Docker Composeの起動・終了用npmスクリプト

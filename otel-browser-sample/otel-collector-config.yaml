@@ -6,22 +6,28 @@ receivers:
         cors:
           allowed_origins:
             - http://localhost:5173
-            - http://127.0.0.1:5173
 
-processors:
-  batch: {}
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+    path: /ready
 
 exporters:
-  otlphttp/lgtm:
-    endpoint: http://lgtm:4318
+  otlp_http/logs:
+    endpoint: http://127.0.0.1:3100/otlp
+    sending_queue:
+      batch: {}
+  otlp_http/traces:
+    endpoint: http://127.0.0.1:4418
+    sending_queue:
+      batch: {}
 
 service:
+  extensions: [health_check]
   pipelines:
     logs:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [otlphttp/lgtm]
+      exporters: [otlp_http/logs]
     traces:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [otlphttp/lgtm]
+      exporters: [otlp_http/traces]
